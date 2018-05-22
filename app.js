@@ -38,7 +38,7 @@ app.post("/signup", function(req,res){
         email: req.body.email,
         image: req.body.image,
         gender: req.body.gender,
-        birthdate: req.body.birthdate
+        birthdate: req.body.birthdate 
     });
 
    validate_user_input(user);
@@ -148,22 +148,17 @@ validate_user_input = function(user){
     }
 
     // validate the birthdate
-    if(user.birthdate.length == 0){
-        error_message.length = "blank";        
+   
+    if(user.birthdate == null){
+        error_message.birthdate = "blank";        
     }
     else{
-        
-        Joi.validate({birthdate:user.birthdate},{birthdate: Joi.date().max((new Date).getFullYear())},function(err,res){
+        Joi.validate({birthdate:user.birthdate},{birthdate: Joi.date().max((new Date()))},function(err,res){
             if(err){
-                console.log(err.message)
-            }
-            else{
-                console.log("adsadasdasdsad"+res)
+                error_message.birthdate = "In The Future";
             }
         });
     }
-
-    
 
 }
 
