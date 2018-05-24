@@ -110,7 +110,33 @@ app.post("/auth",function(req,res){
     });
 });
 
+app.get("/task3",function(req,res){
+    res.render("task3");
+});
 
+app.post("/checktoken",function(req,res){
+    try{
+        const decode = jwt.verify(req.body.token,process.env.JWT_KEY);
+        if(decode.phone == req.body.phone){
+            res.status(200).json({
+                message: "Auth Success",
+                UserInfo: decode
+            });
+        }
+        else{
+            res.status(402).json({
+                message: "Faild: Unauthorized Request"
+            });
+        }
+        res.send(decode.phone);
+    }
+    catch(error){
+        console.log(error.message);
+        res.status(402).json({
+            message: "Faild: Bad Request"
+        });
+    }
+});
 
 
 
