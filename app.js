@@ -4,12 +4,11 @@ var express       = require("express"),
     morgan        = require("morgan"),
     bodyParser    = require("body-parser"),
     path          = require("path"),
-    validator     = require("validator"),
-    Joi           = require('joi'),
-    countryList  = require('country-list')(),
+    jwt           = require("jsonwebtoken");  
     mongoose      = require("mongoose");
 
-const User =  require("./models/users")
+const User =  require("./models/users");
+var custom_validation = require('./middleware/validate');
 
 //add static files to be accessable 
 app.use(express.static(path.join(__dirname,"public")));
@@ -25,6 +24,8 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.set("view engine", "ejs");
 
 
+
+
 app.get("/",function(req,res,next){
     res.render("home");
 });
@@ -38,10 +39,10 @@ app.post("/signup", function(req,res){
         email: req.body.email,
         image: req.body.image,
         gender: req.body.gender,
-        birthdate: req.body.birthdate 
+        birthdate: req.body.birthdate,
+        password: req.body.password 
     });
-
-   validate_user_input(user);
+   let {faild,error_message} = custom_validation.validate_user_input(user);
    if(faild){
         console.log(error_message);
         res.status(500).json({
@@ -49,6 +50,7 @@ app.post("/signup", function(req,res){
         });
     }
     else{
+        console.log("adsd");
         User.create(user,function(err,created_user){
             if(err){
                 console.log(err.message);
@@ -60,128 +62,56 @@ app.post("/signup", function(req,res){
                 res.status(201).json({
                     User: created_user
                 });
-                console.log(created_user);
-                
+                console.log(created_user);             
             }
         });
     }
-       
 });
 
-var faild = false;
-const error_message = {
-    firstname:"",
-    lastname:"",
-    phone: "",
-    country_code: "",
-    email: "",
-    gender: "",
-    birthdate: "",
-    image: "",
-};
+app.get("/task2",function(req,res){
+    res.render("task2");
+});
 
-validate_user_input = function(user){
-    //validate the first name
-    if(validator.isEmpty(user.firstname)){
-        error_message.firstname = "blank";
-        faild = true;
-    }
-    //validate last name
-    if(validator.isEmpty(user.lastname)){
-        error_message.lastname = "blank";
-        faild = true;   
-    }
-
-    //validate country country code
-    if(validator.isEmpty(user.country_code)){
-        error_message.country_code = "blank";
-        faild = true;    
-    }
-    else if(countryList.getName(user.country_code) == undefined){
-        error_message.country_code = "inclusion EX: EG,DZ,UK";        
-        faild = true;    
-    }
-    //validate the phone number  
-    if(user.phone.length == 0){
-        error_message.phone = "Blank";        
-        faild = true;    
-    }
-    else if(!validator.isInt(user.phone)){
-        error_message.phone = "Not a Number";
-        faild = true;    
-    }
-    else if(user.phone.length > 15){
-        error_message.phone = "Too Long count 15";
-        faild = true;    
-    }
-    else if(user.phone.length <10){
-        error_message.phone = "Too short count 10";
-        faild = true;        
-    }
-    else if(!validator.isMobilePhone(user.phone,"ar-EG")){
-        error_message.phone = "Not Exist"
-        faild = true;    
-    }
-    else{
-        User.findOne({"phone":user.phone},function(err,result){
-            if(err){
-                console.log(err.message);
+app.post("/auth",function(req,res){
+    User.findOne({"phone":req.body.phone},function(err,foundUser){
+        if(err){
+            console.log(err.message);
+            res.status(402).json({
+                message:"Auth Faild"
+            });
+        }
+        else{
+            if(foundUser && foundUser.password == req.body.password){
+                console.log(foundUser);               
+                var token = jwt.sign(
+                    {
+                        firstname: foundUser.firstname,
+                        email: foundUser.email,
+                        phone: foundUser.phone
+                    },
+                    process.env.JWT_KEY,
+                    {
+                        expiresIn: "1h"
+                    }
+                );
+                res.status(200).json({
+                    message:"Auth Success",
+                    token: token,
+                });    
             }
             else{
-                if(result == undefined){
-                    error_message.phone = "Taken";
-                    faild = true;                
-                }
+                res.status(402).json({
+                    message: "Auth Faild",
+                });
             }
-        });
-    }
 
-    //validate the email
-    if(validator.isEmpty(user.email)){
-        error_message.email = "blank";
-        faild = true;        
-    }
-    else if(!validator.isEmail(user.email)){
-        error_message.email = "Invalid";
-        faild = true;    
-    }
 
-    //validate the avatar
-    if(validator.isEmpty(user.image)){
-        error_message.image = "blank";
-        faild = true;    
-    }
-    else if(!validator.contains(user.image,["jpg"]) && !validator.contains(user.image,["jpeg"]) && !validator.contains(user.image,["png"]) ){
-        error_message.image = "Invalid Content Type";
-        faild = true;    
-    }
+        }
+    });
+});
 
-    //validate the gender
-    if(validator.isEmpty(user.gender)){
-        error_message.gender = "blank";
-        faild = true;    
-    }
-    else if(!validator.contains(user.gender,["male"]) && !validator.contains(user.gender,["female"])){
-        error_message.gender = "Inclusion";
-        faild = true;   
-    }
 
-    // validate the birthdate
-   
-    if(user.birthdate == null){
-        error_message.birthdate = "blank";        
-        faild = true;    
-    }
-    else{
-        Joi.validate({birthdate:user.birthdate},{birthdate: Joi.date().max((new Date()))},function(err,res){
-            if(err){
-                console.log(err.message);
-                error_message.birthdate = "In The Future";
-                faild = true;     
-            }
-        });
-    }
-}
+
 
 
 var server = app.listen(process.env.PORT || "8080",function (err) {

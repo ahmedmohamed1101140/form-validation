@@ -9,6 +9,19 @@
   <script src="https://cdn.jsdelivr.net/npm/gijgo@1.9.6/js/gijgo.min.js" type="text/javascript"></script>
   <link href="https://cdn.jsdelivr.net/npm/gijgo@1.9.6/css/gijgo.min.css" rel="stylesheet" type="text/css" />
   <body>
+        <ul class="nav justify-content-center">
+            <li class="nav-item">
+                <a class="nav-link active" href="/">Task 1</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/task2">Task 2</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/task3">Task 3</a>
+            </li>
+        </ul>
+
+
 <br><br><br>
     <div class="container">
             <form action="/signup" method="POST" >
@@ -25,6 +38,10 @@
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
                         <input type="text" name="phone" class="form-control" >
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" class="form-control" >
                     </div>
                     <div class="form-group">
                         <label for="country_code">Country Code</label>

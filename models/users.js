@@ -35,6 +35,9 @@ var UserSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    password:{
+        type: String,
+    }
 
 });
 
