@@ -50,7 +50,6 @@ app.post("/signup", function(req,res){
         });
     }
     else{
-        console.log("adsd");
         User.create(user,function(err,created_user){
             if(err){
                 console.log(err.message);
