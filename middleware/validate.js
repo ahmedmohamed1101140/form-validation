@@ -1,33 +1,35 @@
 var validator     = require("validator"),
     Joi           = require('joi'),
-    countryList   = require('country-list')(),
+    countries     = require('country-list')(),
     User          = require("../models/users");
     
-var faild = false;
-const error_message = {
-    firstname:"",
-    lastname:"",
-    phone: "",
-    country_code: "",
-    email: "",
-    gender: "",
-    birthdate: "",
-    image: "",
-    password:""
-};
+
 
 var middlewareObj = {};
 
 middlewareObj.validate_user_input = function(user){
+    
+    var faild = false;
+    const error_message = {
+        firstname:"",
+        lastname:"",
+        phone: "",
+        country_code: "",
+        email: "",
+        gender: "",
+        birthdate: "",
+        image: "",
+        password:""
+    };
     //validate the first name
     if(validator.isEmpty(user.firstname)){
-        error_message.firstname = "blank";
+        error_message.firstname = "Blank";
         faild = true;
     }
 
     //validate last name
     if(validator.isEmpty(user.lastname)){
-        error_message.lastname = "blank";
+        error_message.lastname = "Blank";
         faild = true;   
     }
 
@@ -46,8 +48,9 @@ middlewareObj.validate_user_input = function(user){
         error_message.country_code = "blank";
         faild = true;    
     }
-    else if(countryList.getName(user.country_code) == undefined){
-        error_message.country_code = "inclusion EX: EG,DZ,UK";        
+    else if(countries.getName(user.country_code) == undefined)
+    {
+        error_message.country_code = "inclusion EX: EG,IS,FR,AE,US";        
         faild = true;    
     }
 
@@ -73,18 +76,9 @@ middlewareObj.validate_user_input = function(user){
         faild = true;    
     }
     else{
-        User.findOne({"phone":user.phone},function(err,result){
-            if(err){
-                console.log(err.message);
-            }
-            else{
-                if(result == undefined){
-                    error_message.phone = "Taken";
-                    faild = true;                
-                }
-            }
-        });
+        ///erer
     }
+    
 
     //validate the email
     if(validator.isEmpty(user.email)){
@@ -92,9 +86,11 @@ middlewareObj.validate_user_input = function(user){
         faild = true;        
     }
     else if(!validator.isEmail(user.email)){
-        error_message.email = "Invalid";
+        error_message.email = "Invalid Email";
         faild = true;    
     }
+
+
 
     //validate the avatar
     if(validator.isEmpty(user.image)){

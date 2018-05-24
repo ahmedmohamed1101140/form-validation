@@ -44,7 +44,6 @@ app.post("/signup", function(req,res){
     });
    let {faild,error_message} = custom_validation.validate_user_input(user);
    if(faild){
-        console.log(error_message);
         res.status(500).json({
             error:error_message
         });
