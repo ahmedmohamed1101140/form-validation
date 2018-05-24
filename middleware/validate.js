@@ -75,9 +75,6 @@ middlewareObj.validate_user_input = function(user){
         error_message.phone = "Not Exist"
         faild = true;    
     }
-    else{
-        ///erer
-    }
     
 
     //validate the email
@@ -89,7 +86,6 @@ middlewareObj.validate_user_input = function(user){
         error_message.email = "Invalid Email";
         faild = true;    
     }
-
 
 
     //validate the avatar

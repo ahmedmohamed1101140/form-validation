@@ -20,6 +20,7 @@ app.use(morgan("dev"));
 //setup body parser     
 app.use(bodyParser.urlencoded({extended: false}));
 
+
 // set up the ejs view engine
 app.set("view engine", "ejs");
 
@@ -53,8 +54,9 @@ app.post("/signup", function(req,res){
         User.create(user,function(err,created_user){
             if(err){
                 console.log(err.message);
+                error_message.phone = "Taken";
                 res.status(500).json({
-                    error: err.message
+                    error:error_message
                 });
             }
             else{
@@ -72,41 +74,49 @@ app.get("/task2",function(req,res){
 });
 
 app.post("/auth",function(req,res){
-    User.findOne({"phone":req.body.phone},function(err,foundUser){
-        if(err){
-            console.log(err.message);
-            res.status(402).json({
-                message:"Auth Faild"
-            });
-        }
-        else{
-            if(foundUser && foundUser.password == req.body.password){
-                console.log(foundUser);               
-                var token = jwt.sign(
-                    {
-                        firstname: foundUser.firstname,
-                        email: foundUser.email,
-                        phone: foundUser.phone
-                    },
-                    process.env.JWT_KEY,
-                    {
-                        expiresIn: "1h"
-                    }
-                );
-                res.status(200).json({
-                    message:"Auth Success",
-                    token: token,
-                });    
-            }
-            else{
+    try{
+        User.findOne({"phone":req.body.phone},function(err,foundUser){
+            if(err){
+                console.log(err.message);
                 res.status(402).json({
-                    message: "Auth Faild",
+                    message:"Auth Faild"
                 });
             }
-
-
-        }
-    });
+            else{
+                if(foundUser && foundUser.password == req.body.password){
+                    console.log(foundUser);               
+                    var token = jwt.sign(
+                        {
+                            firstname: foundUser.firstname,
+                            email: foundUser.email,
+                            phone: foundUser.phone
+                        },
+                        process.env.JWT_KEY,
+                        {
+                            expiresIn: "1h"
+                        }
+                    );
+                    res.status(200).json({
+                        message:"Auth Success",
+                        token: token,
+                    });    
+                }
+                else{
+                    res.status(402).json({
+                        message: "Auth Faild",
+                    });
+                }
+    
+    
+            }
+        });
+    }
+    catch(error){
+        console.log(error.message);
+        res.status(402).json({
+            message: "Faild: Bad Request"
+        });
+    }
 });
 
 app.get("/task3",function(req,res){
